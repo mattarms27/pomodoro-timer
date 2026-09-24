@@ -1,5 +1,12 @@
 import SwiftUI
 
+/// Explicit text colors for the task pane. The sidebar list's vibrant `.secondary`
+/// and `.tertiary` styles wash out over the phase gradient.
+private enum PaneText {
+    static let secondary = Color.primary.opacity(0.75)
+    static let tertiary = Color.primary.opacity(0.55)
+}
+
 struct TaskListView: View {
     @Environment(TaskStore.self) private var store
     @Environment(TimerEngine.self) private var engine
@@ -7,6 +14,7 @@ struct TaskListView: View {
     @AppStorage("showCompletedTasks") private var showCompleted = true
     @ViewState private var newTaskTitle = ""
     @FocusState private var isNewTaskFieldFocused: Bool
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         List {
@@ -17,6 +25,7 @@ struct TaskListView: View {
                 .onMove { store.moveOpenTasks(fromOffsets: $0, toOffset: $1) }
             } header: {
                 Text("To Do")
+                    .foregroundStyle(PaneText.secondary)
             }
 
             if !store.doneTasks.isEmpty {
@@ -27,12 +36,15 @@ struct TaskListView: View {
                 } header: {
                     HStack {
                         Text("Completed")
+                            .foregroundStyle(PaneText.secondary)
                         Spacer()
                         Button("Clear") {
                             withAnimation(.smooth) { store.clearCompleted() }
                         }
                         .buttonStyle(.borderless)
                         .font(.caption)
+                        .foregroundStyle(PaneText.secondary)
+                        .padding(.trailing, 8)
                     }
                 }
             }
@@ -42,15 +54,36 @@ struct TaskListView: View {
         .overlay {
             if store.tasks.isEmpty {
                 ContentUnavailableView {
-                    Label("No Tasks", systemImage: "checklist")
+                    Label {
+                        Text("No Tasks")
+                            .foregroundStyle(.primary)
+                    } icon: {
+                        Image(systemName: "checklist")
+                            .foregroundStyle(PaneText.tertiary)
+                    }
                 } description: {
-                    Text("Add what you're working on, and each focus session will count toward it.")
+                    // Explicit break keeps two even lines at any pane width (no widowed word).
+                    Text("Add a task, and each focus session\nwill count toward it.")
+                        .font(.callout)
+                        .foregroundStyle(PaneText.secondary)
                 }
                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             newTaskField
+        }
+        .background {
+            // A scrim that sets the pane apart from the timer and lifts text contrast:
+            // darker in Dark Mode, lighter in Light Mode.
+            Rectangle()
+                .fill(colorScheme == .dark ? Color.black.opacity(0.32) : Color.white.opacity(0.5))
+                .overlay(alignment: .leading) {
+                    Rectangle()
+                        .fill(.separator)
+                        .frame(width: 1)
+                }
+                .ignoresSafeArea()
         }
         .animation(.smooth(duration: 0.35), value: store.tasks)
         .animation(.smooth(duration: 0.35), value: store.activeTaskID)
@@ -68,7 +101,7 @@ struct TaskListView: View {
                 .foregroundStyle(engine.phase.tint)
                 .symbolEffect(.bounce, value: store.tasks.count)
 
-            TextField("New Task", text: $newTaskTitle)
+            TextField("New Task", text: $newTaskTitle, prompt: Text("New Task").foregroundStyle(PaneText.tertiary))
                 .textFieldStyle(.plain)
                 .focused($isNewTaskFieldFocused)
                 .onSubmit(addTask)
@@ -103,7 +136,7 @@ private struct TaskRow: View {
             } label: {
                 Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
-                    .foregroundStyle(task.isDone ? AnyShapeStyle(tint) : AnyShapeStyle(.tertiary))
+                    .foregroundStyle(task.isDone ? AnyShapeStyle(tint) : AnyShapeStyle(PaneText.tertiary))
                     .contentTransition(.symbolEffect(.replace))
                     .symbolEffect(.bounce, value: task.isDone)
             }
@@ -113,8 +146,8 @@ private struct TaskRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 TextField("Task", text: titleBinding, axis: .vertical)
                     .textFieldStyle(.plain)
-                    .strikethrough(task.isDone, color: .secondary)
-                    .foregroundStyle(task.isDone ? .secondary : .primary)
+                    .strikethrough(task.isDone, color: PaneText.tertiary)
+                    .foregroundStyle(task.isDone ? PaneText.secondary : .primary)
 
                 PomodoroEstimate(task: task, tint: tint)
             }
@@ -134,7 +167,7 @@ private struct TaskRow: View {
                 } label: {
                     Image(systemName: "scope")
                         .font(.callout)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(PaneText.secondary)
                 }
                 .buttonStyle(.plain)
                 .transition(.opacity)
@@ -230,7 +263,7 @@ private struct PomodoroEstimate: View {
                 Text("\(task.completedPomodoros)/\(task.estimate)")
                     .font(.caption)
                     .monospacedDigit()
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(PaneText.secondary)
                     .contentTransition(.numericText())
             }
             .contentShape(.rect)
