@@ -1,11 +1,19 @@
 import SwiftUI
 
-/// The Timer menu and the View ▸ Appearance submenu.
+/// File ▸ New Task, the Timer menu, and the View ▸ Appearance submenu.
 struct TimerCommands: Commands {
     let engine: TimerEngine
     @Bindable var settings: AppSettings
+    let tasks: TaskStore
 
     var body: some Commands {
+        CommandGroup(replacing: .newItem) {
+            Button("New Task") {
+                tasks.wantsNewTaskFocus = true
+            }
+            .keyboardShortcut("n", modifiers: .command)
+        }
+
         CommandMenu("Timer") {
             Button(engine.isRunning ? "Pause" : "Start") {
                 withAnimation(.bouncy) { engine.toggle() }

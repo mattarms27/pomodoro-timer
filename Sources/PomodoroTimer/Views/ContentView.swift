@@ -2,6 +2,8 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(TimerEngine.self) private var engine
+    @Environment(TaskStore.self) private var tasks
+    @AppStorage("showTasks") private var showTasks = true
 
     var body: some View {
         TimerView()
@@ -15,8 +17,32 @@ struct ContentView: View {
                     PhasePicker()
                 }
             }
+            .inspector(isPresented: $showTasks) {
+                TaskListView()
+                    .inspectorColumnWidth(min: 260, ideal: 300, max: 420)
+                    .toolbar {
+                        ToolbarItem(placement: .primaryAction) {
+                            Spacer()
+                        }
+                        ToolbarItem(placement: .primaryAction) {
+                            tasksToggle
+                        }
+                    }
+            }
+            .onChange(of: tasks.wantsNewTaskFocus) { _, wantsFocus in
+                if wantsFocus { showTasks = true }
+            }
             .toolbar(removing: .title)
             .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
+    }
+
+    private var tasksToggle: some View {
+        Button {
+            withAnimation(.smooth) { showTasks.toggle() }
+        } label: {
+            Label("Tasks", systemImage: "checklist")
+        }
+        .help(showTasks ? "Hide Tasks" : "Show Tasks")
     }
 }
 

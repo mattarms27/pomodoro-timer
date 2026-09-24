@@ -58,6 +58,10 @@ final class TimerEngine {
         if case .running = state { true } else { false }
     }
 
+    var isPaused: Bool {
+        if case .paused = state { true } else { false }
+    }
+
     var isIdle: Bool { state == .idle }
 
     /// Whole seconds left, rounded up so "25:00" shows for the full first second.

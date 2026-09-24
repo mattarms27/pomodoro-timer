@@ -3,6 +3,7 @@ import SwiftUI
 struct TimerView: View {
     @Environment(TimerEngine.self) private var engine
     @Environment(AppSettings.self) private var settings
+    @Environment(TaskStore.self) private var tasks
 
     var body: some View {
         VStack(spacing: 32) {
@@ -24,7 +25,11 @@ struct TimerView: View {
                     Text(statusText)
                         .font(.callout)
                         .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .frame(maxWidth: 220)
                         .contentTransition(.opacity)
+                        .id(statusText)
+                        .transition(.blurReplace)
                 }
             }
             .frame(maxWidth: 330, maxHeight: 330)
@@ -57,7 +62,10 @@ struct TimerView: View {
     }
 
     private var statusText: String {
-        switch engine.state {
+        if engine.phase == .focus, !engine.isPaused, let task = tasks.activeTask {
+            return task.title
+        }
+        return switch engine.state {
         case .idle: "Ready"
         case .running: engine.phase.isBreak ? "Take a breather" : "Stay focused"
         case .paused: "Paused"
