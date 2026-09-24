@@ -6,13 +6,20 @@ struct ContentView: View {
     @AppStorage("showTasks") private var showTasks = true
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Lives in the content rather than the toolbar: a centered toolbar item
-            // gets cross-faded between positions when the inspector opens or closes,
-            // which reads as ghosting. In the content it simply slides with the layout.
-            PhasePicker()
-                .padding(.top, 8)
-            TimerView()
+        GeometryReader { proxy in
+            VStack(spacing: 0) {
+                // Lives in the content rather than the toolbar: a centered toolbar item
+                // gets cross-faded between positions when the inspector opens or closes,
+                // which reads as ghosting. In the content it simply slides with the layout.
+                // It's drawn up into the title bar strip, centered on the window controls.
+                PhasePicker()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: proxy.safeAreaInsets.top)
+                    .background { TitleBarDragArea() }
+                TimerView()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .ignoresSafeArea(edges: .top)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .frame(minWidth: 460, minHeight: 560)
@@ -48,7 +55,7 @@ struct ContentView: View {
     }
 }
 
-/// The Focus / Short Break / Long Break switcher above the timer: a glass
+/// The Focus / Short Break / Long Break switcher in the title bar strip: a glass
 /// capsule whose tinted selection slides between phases.
 struct PhasePicker: View {
     @Environment(TimerEngine.self) private var engine
