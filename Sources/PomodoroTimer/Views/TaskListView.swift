@@ -17,15 +17,53 @@ struct TaskListView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
+        GeometryReader { proxy in
+            VStack(spacing: 0) {
+                // The pane title sits in the title bar strip, level with the Tasks button.
+                paneHeader
+                    .frame(height: proxy.safeAreaInsets.top)
+                taskList
+            }
+            .ignoresSafeArea(edges: .top)
+        }
+        .background {
+            // A scrim that sets the pane apart from the timer and lifts text contrast:
+            // darker in Dark Mode, lighter in Light Mode.
+            Rectangle()
+                .fill(colorScheme == .dark ? Color.black.opacity(0.32) : Color.white.opacity(0.5))
+                .overlay(alignment: .leading) {
+                    Rectangle()
+                        .fill(.separator)
+                        .frame(width: 1)
+                }
+                .ignoresSafeArea()
+        }
+        .animation(.smooth(duration: 0.35), value: store.tasks)
+        .animation(.smooth(duration: 0.35), value: store.activeTaskID)
+        .onChange(of: store.wantsNewTaskFocus, initial: true) { _, wantsFocus in
+            guard wantsFocus else { return }
+            isNewTaskFieldFocused = true
+            store.wantsNewTaskFocus = false
+        }
+    }
+
+    private var paneHeader: some View {
+        Text("To Do")
+            .font(.title3.weight(.bold))
+            .foregroundStyle(.primary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, 18)
+            .background { TitleBarDragArea() }
+            .accessibilityAddTraits(.isHeader)
+    }
+
+    private var taskList: some View {
         List {
             Section {
                 ForEach(store.openTasks) { task in
                     TaskRow(task: task, isActive: task.id == store.activeTaskID)
                 }
                 .onMove { store.moveOpenTasks(fromOffsets: $0, toOffset: $1) }
-            } header: {
-                Text("To Do")
-                    .foregroundStyle(PaneText.secondary)
             }
 
             if !store.doneTasks.isEmpty {
@@ -72,25 +110,6 @@ struct TaskListView: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             newTaskField
-        }
-        .background {
-            // A scrim that sets the pane apart from the timer and lifts text contrast:
-            // darker in Dark Mode, lighter in Light Mode.
-            Rectangle()
-                .fill(colorScheme == .dark ? Color.black.opacity(0.32) : Color.white.opacity(0.5))
-                .overlay(alignment: .leading) {
-                    Rectangle()
-                        .fill(.separator)
-                        .frame(width: 1)
-                }
-                .ignoresSafeArea()
-        }
-        .animation(.smooth(duration: 0.35), value: store.tasks)
-        .animation(.smooth(duration: 0.35), value: store.activeTaskID)
-        .onChange(of: store.wantsNewTaskFocus, initial: true) { _, wantsFocus in
-            guard wantsFocus else { return }
-            isNewTaskFieldFocused = true
-            store.wantsNewTaskFocus = false
         }
     }
 

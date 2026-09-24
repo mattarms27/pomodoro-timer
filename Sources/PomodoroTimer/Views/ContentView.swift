@@ -55,25 +55,6 @@ struct ContentView: View {
     }
 }
 
-/// Since the phase picker's strip covers the title bar, this restores the title
-/// bar's behavior in the empty space around it: drag to move the window, and
-/// double-click to zoom or minimize, per System Settings.
-private struct TitleBarDragArea: View {
-    var body: some View {
-        Color.clear
-            .contentShape(.rect)
-            .gesture(WindowDragGesture())
-            .onTapGesture(count: 2) {
-                let window = NSApp.keyWindow
-                switch UserDefaults.standard.string(forKey: "AppleActionOnDoubleClick") {
-                case "Minimize": window?.miniaturize(nil)
-                case "None": break
-                default: window?.zoom(nil)
-                }
-            }
-    }
-}
-
 /// The Focus / Short Break / Long Break switcher in the title bar strip: a glass
 /// capsule whose tinted selection slides between phases.
 struct PhasePicker: View {
