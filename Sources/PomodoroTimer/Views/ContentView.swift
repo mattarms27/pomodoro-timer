@@ -6,34 +6,36 @@ struct ContentView: View {
     @AppStorage("showTasks") private var showTasks = true
 
     var body: some View {
-        TimerView()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .frame(minWidth: 460, minHeight: 560)
-            .background {
-                PhaseBackground(phase: engine.phase, isRunning: engine.isRunning)
-            }
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    PhasePicker()
-                }
-            }
-            .inspector(isPresented: $showTasks) {
-                TaskListView()
-                    .inspectorColumnWidth(min: 260, ideal: 300, max: 420)
-                    .toolbar {
-                        ToolbarItem(placement: .primaryAction) {
-                            Spacer()
-                        }
-                        ToolbarItem(placement: .primaryAction) {
-                            tasksToggle
-                        }
+        VStack(spacing: 0) {
+            // Lives in the content rather than the toolbar: a centered toolbar item
+            // gets cross-faded between positions when the inspector opens or closes,
+            // which reads as ghosting. In the content it simply slides with the layout.
+            PhasePicker()
+                .padding(.top, 8)
+            TimerView()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(minWidth: 460, minHeight: 560)
+        .background {
+            PhaseBackground(phase: engine.phase, isRunning: engine.isRunning)
+        }
+        .inspector(isPresented: $showTasks) {
+            TaskListView()
+                .inspectorColumnWidth(min: 260, ideal: 300, max: 420)
+                .toolbar {
+                    ToolbarItem(placement: .primaryAction) {
+                        Spacer()
                     }
-            }
-            .onChange(of: tasks.wantsNewTaskFocus) { _, wantsFocus in
-                if wantsFocus { showTasks = true }
-            }
-            .toolbar(removing: .title)
-            .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
+                    ToolbarItem(placement: .primaryAction) {
+                        tasksToggle
+                    }
+                }
+        }
+        .onChange(of: tasks.wantsNewTaskFocus) { _, wantsFocus in
+            if wantsFocus { showTasks = true }
+        }
+        .toolbar(removing: .title)
+        .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
     }
 
     private var tasksToggle: some View {
@@ -46,26 +48,40 @@ struct ContentView: View {
     }
 }
 
-/// The Focus / Short Break / Long Break switcher that lives in the toolbar.
+/// The Focus / Short Break / Long Break switcher above the timer: a glass
+/// capsule whose tinted selection slides between phases.
 struct PhasePicker: View {
     @Environment(TimerEngine.self) private var engine
+    @Namespace private var selection
 
     var body: some View {
-        Picker("Phase", selection: selection) {
+        HStack(spacing: 2) {
             ForEach(TimerPhase.allCases) { phase in
-                Text(phase.title).tag(phase)
+                let isSelected = phase == engine.phase
+
+                Button {
+                    withAnimation(.smooth(duration: 0.5)) { engine.select(phase) }
+                } label: {
+                    Text(phase.title)
+                        .font(.system(size: 13, weight: isSelected ? .semibold : .medium))
+                        .foregroundStyle(isSelected ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 7)
+                        .background {
+                            if isSelected {
+                                Capsule()
+                                    .fill(phase.tint.opacity(0.3))
+                                    .matchedGeometryEffect(id: "selection", in: selection)
+                            }
+                        }
+                        .contentShape(.capsule)
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
         }
-        .pickerStyle(.segmented)
-        .labelsHidden()
-        .fixedSize()
-    }
-
-    private var selection: Binding<TimerPhase> {
-        Binding {
-            engine.phase
-        } set: { phase in
-            withAnimation(.smooth(duration: 0.5)) { engine.select(phase) }
-        }
+        .padding(4)
+        .glassEffect(.regular, in: .capsule)
+        .animation(.smooth(duration: 0.4), value: engine.phase)
     }
 }
