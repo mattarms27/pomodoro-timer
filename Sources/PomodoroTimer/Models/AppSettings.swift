@@ -15,6 +15,11 @@ enum AppearanceMode: String, CaseIterable, Identifiable {
         }
     }
 
+    /// The saved mode, readable before `AppSettings` exists (e.g. at launch).
+    static var stored: AppearanceMode {
+        AppearanceMode(rawValue: UserDefaults.standard.string(forKey: "appearance") ?? "") ?? .system
+    }
+
     var nsAppearance: NSAppearance? {
         switch self {
         case .system: nil

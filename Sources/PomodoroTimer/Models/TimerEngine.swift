@@ -16,6 +16,8 @@ final class TimerEngine {
     /// Focus sessions finished in the current cycle (resets after a long break).
     private(set) var completedInCycle = 0
     private(set) var stats: DailyStats
+    /// Increments each time a phase finishes naturally; views use it to celebrate.
+    private(set) var completionCount = 0
 
     /// Updated by the ticker; views read `remaining`, which depends on it.
     private var now = Date()
@@ -113,6 +115,7 @@ final class TimerEngine {
         if finished == .focus {
             stats.record(focusSeconds: duration)
         }
+        completionCount += 1
         notifier.releasePending()
         notifier.playCompletionSound()
         onPhaseCompleted?(finished)

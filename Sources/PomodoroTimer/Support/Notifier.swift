@@ -1,12 +1,14 @@
 import AppKit
+import Observation
 import UserNotifications
 
 /// Plays the completion sound and schedules system notifications for phase ends.
+@Observable
 final class Notifier: NSObject {
-    private let settings: AppSettings
+    @ObservationIgnored private let settings: AppSettings
     /// Each phase run gets its own ID, so scheduling the next phase never
     /// replaces a notification that is about to be delivered.
-    private var pendingRequestID: String?
+    @ObservationIgnored private var pendingRequestID: String?
 
     /// `UNUserNotificationCenter` requires a bundle identifier, which only exists
     /// when running from the assembled .app (not from `swift run`).
