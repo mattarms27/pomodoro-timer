@@ -11,6 +11,15 @@ Built with Swift Package Manager and the Xcode Command Line Tools only (no Xcode
 
 Targets macOS 26+ (Liquid Glass APIs such as `glassEffect`, `GlassEffectContainer`, `.glassProminent`).
 
+## Code conventions
+
+- Use `@ViewState` instead of `@State` for view-local state. In the macOS 27 SDK `@State` is a macro whose
+  plugin ships only with Xcode.app, so it fails to build with the Command Line Tools. `ViewState` is a
+  typealias for the `State` property wrapper (see `Support/ViewState.swift`). Avoid other SwiftUI macros
+  (`@Entry`, `@Animatable`, `#Preview`) for the same reason. `@Observable` works.
+- The package uses `defaultIsolation(MainActor.self)`; everything is main-actor by default.
+- To check UI changes, run `./Scripts/bundle.sh --run` and take a window screenshot with `screencapture -l <windowID>`.
+
 ## Git workflow
 
 - Create a separate commit for each notable piece of work.
