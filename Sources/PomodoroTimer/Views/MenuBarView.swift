@@ -50,6 +50,10 @@ struct MenuBarView: View {
                     NSApp.activate()
                 }
                 Spacer()
+                SettingsLink {
+                    Image(systemName: "gearshape")
+                }
+                .help("Settings")
                 Button("Quit") { NSApp.terminate(nil) }
             }
             .buttonStyle(.borderless)
