@@ -135,7 +135,8 @@ private struct TodaySummary: View {
 
     var body: some View {
         Group {
-            if stats.focusSessions == 0 {
+            // Stats from a previous day (app left open overnight) read as a fresh start.
+            if stats.focusSessions == 0 || stats.day != DailyStats.today {
                 Text("No focus sessions yet today")
             } else {
                 Text("^[\(stats.focusSessions) session](inflect: true) · \(focusTime) focused today")
