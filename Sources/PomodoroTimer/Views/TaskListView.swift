@@ -62,7 +62,9 @@ struct TaskListView: View {
                             .foregroundStyle(PaneText.tertiary)
                     }
                 } description: {
-                    Text("Add what you're working on, and each focus session will count toward it.")
+                    // Explicit break keeps two even lines at any pane width (no widowed word).
+                    Text("Add a task, and each focus session\nwill count toward it.")
+                        .font(.callout)
                         .foregroundStyle(PaneText.secondary)
                 }
                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
