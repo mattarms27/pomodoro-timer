@@ -159,7 +159,8 @@ final class TimerEngine {
         )
         ticker = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .milliseconds(200))
+                guard let delay = self?.delayUntilNextTick() else { return }
+                try? await Task.sleep(for: .seconds(delay), tolerance: .milliseconds(5))
                 guard let self, !Task.isCancelled else { return }
                 self.now = Date()
                 if self.remaining <= 0 {
@@ -168,6 +169,18 @@ final class TimerEngine {
                 }
             }
         }
+    }
+
+    /// Ticks land on a fixed grid measured back from the end date, so each whole
+    /// second is observed just after it rolls over. A free-running sleep drifts
+    /// against that grid, which makes an occasional second visibly shorter.
+    private func delayUntilNextTick() -> TimeInterval {
+        let interval: TimeInterval = 0.2
+        guard case .running(let endDate) = state else { return interval }
+        let intoTick = max(0, endDate.timeIntervalSinceNow)
+            .truncatingRemainder(dividingBy: interval)
+        // Wake slightly past the boundary so rounding up already shows the new second.
+        return intoTick + 0.01
     }
 
     private func stopTicker() {
