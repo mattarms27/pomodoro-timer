@@ -41,6 +41,14 @@ Some tips:
 
 This builds a release binary with Swift Package Manager, assembles and ad-hoc signs `dist/Pomodoro Timer.app`, and opens it. Leave off `--run` to build without launching. You can drag the `.app` into `/Applications`.
 
+To package a drag-to-install disk image at `dist/Pomodoro-Timer-<version>.dmg`:
+
+```bash
+./Scripts/make-dmg.sh
+```
+
+This builds the app first (pass `--skip-build` to reuse the existing `.app`), then lays out the Finder window over `Resources/DMG/background@2x.png`, a 1320×800 image for a 660×400-point window. Finder automation lays out the window, so macOS may ask for permission the first time.
+
 To regenerate the app icon after editing `Scripts/make-icon.swift`:
 
 ```bash
@@ -66,8 +74,8 @@ Sources/PomodoroTimer/
   Models/                  Timer engine, phases, settings, task store
   Views/                   Timer, controls, task list, settings, menu bar UI
   Support/                 Notifications and the ViewState alias
-Resources/                 Info.plist and the app icon
-Scripts/                   Bundling and icon generation
+Resources/                 Info.plist, the app icon, and the DMG background
+Scripts/                   Bundling, DMG packaging, and icon generation
 ```
 
 Tasks are stored in `~/Library/Application Support/PomodoroTimer/tasks.json`. Preferences are stored in `UserDefaults`.
