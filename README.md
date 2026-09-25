@@ -12,6 +12,22 @@ A native macOS Pomodoro timer with a built-in task list, written in SwiftUI with
 - **Alerts** — A sound and a notification when each phase ends.
 - **Accurate timing** — The countdown works from an end time, so it stays correct through sleep and App Nap.
 
+## New to the Pomodoro Technique?
+
+The Pomodoro Technique breaks work into short, focused blocks with regular breaks. Each block is called a *Pomodoro*.
+
+1. **Pick a task.** Add it to the task list and set roughly how many Pomodoros you think it will take by clicking its dots.
+2. **Focus for 25 minutes.** Press Start and work only on that task until the timer ends. If something else comes to mind, jot it down as a new task and get back to work.
+3. **Take a 5-minute break.** Breaks start on their own. Step away from the screen.
+4. **Repeat.** Press Start for the next focus session when you're ready. After every 4 sessions you get a longer 15-minute break.
+
+Some tips:
+
+- Each finished focus session is credited to the current task, so a task can take several Pomodoros. That's what the estimate is for. Finishing over it just shows as, say, `2/1`.
+- When you finish a task, tick it off and the next one becomes current.
+- Batch tiny tasks (a few quick emails, say) into a single Pomodoro instead of giving each one a full session.
+- All durations, and whether breaks and focus sessions start automatically, can be changed in Settings (⌘,).
+
 ## Requirements
 
 - macOS 26 or later
