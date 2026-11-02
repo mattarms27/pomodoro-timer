@@ -212,19 +212,20 @@ private struct MiniWindow: View {
             }
             .padding(5)
 
-            Circle()
-                .strokeBorder(tint, lineWidth: 3)
-                .frame(width: 26, height: 26)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .offset(x: -10, y: 3)
+            // Centered as a group, with the gap wide enough that the Automatic thumbnail's
+            // diagonal split passes between the circle and the lines without touching either.
+            HStack(spacing: 18) {
+                Circle()
+                    .strokeBorder(tint, lineWidth: 3)
+                    .frame(width: 26, height: 26)
 
-            VStack(alignment: .leading, spacing: 3) {
-                ForEach(0..<3, id: \.self) { _ in
-                    Capsule().fill(chrome).frame(width: 18, height: 3)
+                VStack(spacing: 3) {
+                    ForEach(0..<3, id: \.self) { _ in
+                        Capsule().fill(chrome).frame(width: 18, height: 3)
+                    }
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
-            .padding(.trailing, 8)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .offset(y: 3)
         }
     }
